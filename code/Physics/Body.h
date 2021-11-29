@@ -24,4 +24,6 @@ public:
 	Quat		m_orientation;
 
 	Shape *		m_shape;
+
+	Vec3		m_linearVelocity;
 };
