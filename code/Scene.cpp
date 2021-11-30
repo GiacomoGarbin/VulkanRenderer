@@ -45,19 +45,20 @@ void Scene::Reset() {
 Scene::Initialize
 ====================================================
 */
-void Scene::Initialize() {
+void Scene::Initialize()
+{
 	Body body;
-	body.m_position = Vec3( 0, 0, 0 );
-	body.m_orientation = Quat( 0, 0, 0, 1 );
-	body.m_shape = new ShapeSphere( 1.0f );
-	m_bodies.push_back( body );
+	body.m_position = Vec3(0, 0, 10);
+	body.m_orientation = Quat(0, 0, 0, 1);
+	body.m_invMass = 1.0f;
+	body.m_shape = new ShapeSphere(1.0f);
+	m_bodies.push_back(body);
 
-	body.m_position = Vec3( 0, 0, -101 );
-	body.m_orientation = Quat( 0, 0, 0, 1 );
-	body.m_shape = new ShapeSphere( 100.0f );
-	m_bodies.push_back( body );
-
-	// TODO: Add code
+	body.m_position = Vec3(0, 0, -1000);
+	body.m_orientation = Quat(0, 0, 0, 1);
+	body.m_invMass = 0.0f;
+	body.m_shape = new ShapeSphere(1000.0f);
+	m_bodies.push_back(body);
 }
 
 /*
@@ -65,12 +66,16 @@ void Scene::Initialize() {
 Scene::Update
 ====================================================
 */
-void Scene::Update( const float dt_sec ) {
-	// TODO: Add code
+void Scene::Update( const float dt_sec )
+{
 	for (int i = 0; i < m_bodies.size(); ++i)
 	{
+		Body* body = &m_bodies[i];
+		float mass = 1.0f / body->m_invMass;
+
 		// acceleration due to gravity
-		m_bodies[i].m_linearVelocity += Vec3(0, 0, -10) * dt_sec;
+		Vec3 impulseGravity = Vec3(0, 0, -10) * mass * dt_sec;
+		body->ApplyImpulseLinear(impulseGravity);
 	}
 
 	for (int i = 0; i < m_bodies.size(); ++i)
