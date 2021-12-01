@@ -5,7 +5,8 @@
 #include "Body.h"
 
 
-struct contact_t {
+struct contact_t
+{
 	Vec3 ptOnA_WorldSpace;
 	Vec3 ptOnB_WorldSpace;
 	Vec3 ptOnA_LocalSpace;
@@ -15,8 +16,8 @@ struct contact_t {
 	float separationDistance;	// positive when non-penetrating, negative when penetrating
 	float timeOfImpact;
 
-	Body * bodyA;
-	Body * bodyB;
+	Body* bodyA;
+	Body* bodyB;
 };
 
-void ResolveContact( contact_t & contact );
+void ResolveContact(contact_t& contact);

@@ -20,8 +20,8 @@ Scene::~Scene
 ====================================================
 */
 Scene::~Scene() {
-	for ( int i = 0; i < m_bodies.size(); i++ ) {
-		delete m_bodies[ i ].m_shape;
+	for (int i = 0; i < m_bodies.size(); i++) {
+		delete m_bodies[i].m_shape;
 	}
 	m_bodies.clear();
 }
@@ -32,8 +32,8 @@ Scene::Reset
 ====================================================
 */
 void Scene::Reset() {
-	for ( int i = 0; i < m_bodies.size(); i++ ) {
-		delete m_bodies[ i ].m_shape;
+	for (int i = 0; i < m_bodies.size(); i++) {
+		delete m_bodies[i].m_shape;
 	}
 	m_bodies.clear();
 
@@ -66,7 +66,7 @@ void Scene::Initialize()
 Scene::Update
 ====================================================
 */
-void Scene::Update( const float dt_sec )
+void Scene::Update(const float dt_sec)
 {
 	for (int i = 0; i < m_bodies.size(); ++i)
 	{
@@ -82,22 +82,21 @@ void Scene::Update( const float dt_sec )
 	{
 		for (int j = i + 1; j < m_bodies.size(); ++j)
 		{
-			Body* a = &m_bodies[i];
-			Body* b = &m_bodies[j];
+			Body* bodyA = &m_bodies[i];
+			Body* bodyB = &m_bodies[j];
 
-			if (a->m_invMass == 0.0f && b->m_invMass == 0.0f)
+			if (bodyA->m_invMass == 0.0f && bodyB->m_invMass == 0.0f)
 			{
 				continue;
 			}
 
-			if (Intersect(a, b))
+			contact_t contact;
+			if (Intersect(bodyA, bodyB, contact))
 			{
-				a->m_linearVelocity.Zero();
-				b->m_linearVelocity.Zero();
+				ResolveContact(contact);
 			}
 		}
 	}
-
 
 	for (int i = 0; i < m_bodies.size(); ++i)
 	{
