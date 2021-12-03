@@ -25,6 +25,7 @@ public:
 	Quat		m_orientation;
 	Vec3		m_linearVelocity;
 	float		m_invMass;
+	float		m_elasticity;
 	Shape *		m_shape;
 
 	void ApplyImpulseLinear(const Vec3& impulse);
