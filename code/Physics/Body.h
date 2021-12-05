@@ -24,9 +24,14 @@ public:
 	Vec3		m_position;
 	Quat		m_orientation;
 	Vec3		m_linearVelocity;
+	Vec3		m_angularVelocity;
 	float		m_invMass;
 	float		m_elasticity;
 	Shape *		m_shape;
 
 	void ApplyImpulseLinear(const Vec3& impulse);
+	void ApplyImpulseAngular(const Vec3& impulse);
+
+	Mat3 GetInverseInertiaTensorLocalSpace() const;
+	Mat3 GetInverseInertiaTensorWorldSpace() const;
 };

@@ -9,7 +9,8 @@
 ShapeSphere
 ====================================================
 */
-class ShapeSphere : public Shape {
+class ShapeSphere : public Shape
+{
 public:
 	explicit ShapeSphere( const float radius ) : m_radius( radius ) {
 		m_centerOfMass.Zero();

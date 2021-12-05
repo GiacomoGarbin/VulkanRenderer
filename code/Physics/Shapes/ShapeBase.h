@@ -13,7 +13,8 @@
 Shape
 ====================================================
 */
-class Shape {
+class Shape
+{
 public:
 	virtual Mat3 InertiaTensor() const = 0;
 
