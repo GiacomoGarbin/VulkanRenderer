@@ -102,7 +102,6 @@ void Scene::Update(const float dt_sec)
 
 	for (int i = 0; i < m_bodies.size(); ++i)
 	{
-		// position update
-		m_bodies[i].m_position += m_bodies[i].m_linearVelocity * dt_sec;
+		m_bodies[i].Update(dt_sec);
 	}
 }
