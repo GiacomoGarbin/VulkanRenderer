@@ -41,4 +41,6 @@ public:
 	Vec3 GetCenterOfMassWorldSpace() const;
 
 	void Update(const float dt_sec);
+
+	Vec3 WorldSpaceToLocalSpace(const Vec3& worldPt) const;
 };

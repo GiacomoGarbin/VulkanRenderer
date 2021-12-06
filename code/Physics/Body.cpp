@@ -90,7 +90,6 @@ Vec3 Body::GetCenterOfMassWorldSpace() const
 	return position;
 }
 
-
 void Body::Update(const float dt_sec)
 {
 	// update position (linear velocity)
@@ -113,4 +112,12 @@ void Body::Update(const float dt_sec)
 
 	// update position (total torque)
 	m_position = centerOfMass + dq.RotatePoint(centerOfMassToPosition);
+}
+
+Vec3 Body::WorldSpaceToLocalSpace(const Vec3& worldPt) const
+{
+	Vec3 tmp = worldPt - GetCenterOfMassWorldSpace();
+	Quat inverseOrient = m_orientation.Inverse();
+	Vec3 localPt = inverseOrient.RotatePoint(tmp);
+	return localPt;
 }
