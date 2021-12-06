@@ -112,5 +112,5 @@ void Body::Update(const float dt_sec)
 	m_orientation.Normalize();
 
 	// update position (total torque)
-	m_position = centerOfMass+dq.RotatePoint(centerOfMassToPosition);
+	m_position = centerOfMass + dq.RotatePoint(centerOfMassToPosition);
 }

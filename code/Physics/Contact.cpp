@@ -39,18 +39,38 @@ void ResolveContact(contact_t& contact)
 
 	// collision impulse
 	const Vec3 vab = velA - velB;
-	const float J = -(1.0f + elasticity) * vab.Dot(n) / (invMassA + invMassB + angularFactor);
+	const float J = (1.0f + elasticity) * vab.Dot(n) / (invMassA + invMassB + angularFactor);
 	const Vec3 impulse = n * J;
 
-	bodyA->ApplyImpulse(ptOnA, impulse * +1.0f);
-	bodyB->ApplyImpulse(ptOnB, impulse * -1.0f);
+	bodyA->ApplyImpulse(ptOnA, impulse * -1.0f);
+	bodyB->ApplyImpulse(ptOnB, impulse * +1.0f);
+
+	// friction impulse
+	const float friction = bodyA->m_friction * bodyB->m_friction;
+
+	// normal direction of the velocity with respect to the normal of the collision
+	const Vec3 velNorm = n * n.Dot(vab);
+	// tangent direction of the velocity with respect to the normal of the collision
+	const Vec3 velTang = vab - velNorm;
+
+	Vec3 relativeVelTang = velTang;
+	relativeVelTang.Normalize();
+
+	const Vec3 inertiaA = (invWorldInertiaA * ra.Cross(relativeVelTang)).Cross(ra);
+	const Vec3 inertiaB = (invWorldInertiaB * rb.Cross(relativeVelTang)).Cross(rb);
+	const float invInertia = (inertiaA + inertiaB).Dot(relativeVelTang);
+
+	const float reducedMass = 1.0f / (invMassA + invMassB + invInertia);
+	const Vec3 impulseFriction = velTang * reducedMass * friction;
+
+	bodyA->ApplyImpulse(ptOnA, impulseFriction * -1.0f);
+	bodyB->ApplyImpulse(ptOnB, impulseFriction * +1.0f);
 
 	// move colliding objects just outside of each other
-	const float tA = bodyA->m_invMass / (bodyA->m_invMass + bodyB->m_invMass);
-	const float tB = bodyB->m_invMass / (bodyA->m_invMass + bodyB->m_invMass);
-
-	const Vec3 ds = contact.ptOnB_WorldSpace - contact.ptOnA_WorldSpace;
+	const Vec3 ds = ptOnB - ptOnA;
+	const float tA = invMassA / (invMassA + invMassB);
+	const float tB = invMassB / (invMassA + invMassB);
 
 	bodyA->m_position += ds * tA;
-	bodyA->m_position -= ds * tB;
+	bodyB->m_position -= ds * tB;
 }
