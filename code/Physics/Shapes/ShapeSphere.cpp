@@ -16,7 +16,8 @@ ShapeSphere
 ShapeSphere::Support
 ====================================================
 */
-Vec3 ShapeSphere::Support(const Vec3& dir, const Vec3& pos, const Quat& orient, const float bias) const {
+Vec3 ShapeSphere::Support(const Vec3& dir, const Vec3& pos, const Quat& orient, const float bias) const
+{
 	Vec3 supportPt;
 
 	// TODO: Add code
@@ -46,11 +47,11 @@ Mat3 ShapeSphere::InertiaTensor() const
 ShapeSphere::GetBounds
 ====================================================
 */
-Bounds ShapeSphere::GetBounds(const Vec3& pos, const Quat& orient) const {
+Bounds ShapeSphere::GetBounds(const Vec3& pos, const Quat& orient) const
+{
 	Bounds tmp;
-
-	// TODO: Add code
-
+	tmp.mins = Vec3(-m_radius) + pos;
+	tmp.maxs = Vec3(+m_radius) + pos;
 	return tmp;
 }
 
@@ -59,10 +60,10 @@ Bounds ShapeSphere::GetBounds(const Vec3& pos, const Quat& orient) const {
 ShapeSphere::GetBounds
 ====================================================
 */
-Bounds ShapeSphere::GetBounds() const {
+Bounds ShapeSphere::GetBounds() const
+{
 	Bounds tmp;
-
-	// TODO: Add code
-
+	tmp.mins = Vec3(-m_radius);
+	tmp.maxs = Vec3(+m_radius);
 	return tmp;
 }

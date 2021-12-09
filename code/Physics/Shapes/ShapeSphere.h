@@ -12,7 +12,8 @@ ShapeSphere
 class ShapeSphere : public Shape
 {
 public:
-	explicit ShapeSphere( const float radius ) : m_radius( radius ) {
+	explicit ShapeSphere( const float radius ) : m_radius( radius )
+	{
 		m_centerOfMass.Zero();
 	}
 
