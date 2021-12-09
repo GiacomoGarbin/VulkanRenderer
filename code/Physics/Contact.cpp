@@ -13,8 +13,8 @@ void ResolveContact(contact_t& contact)
 	Body* bodyA = contact.bodyA;
 	Body* bodyB = contact.bodyB;
 
-	const Vec3 ptOnA = contact.ptOnA_WorldSpace;
-	const Vec3 ptOnB = contact.ptOnB_WorldSpace;
+	const Vec3 ptOnA = bodyA->LocalSpaceToWorldSpace(contact.ptOnA_LocalSpace);
+	const Vec3 ptOnB = bodyB->LocalSpaceToWorldSpace(contact.ptOnB_LocalSpace);
 
 	const float elasticity = bodyA->m_elasticity * bodyB->m_elasticity;
 
@@ -24,7 +24,7 @@ void ResolveContact(contact_t& contact)
 	const Mat3 invWorldInertiaA = bodyA->GetInverseInertiaTensorWorldSpace();
 	const Mat3 invWorldInertiaB = bodyB->GetInverseInertiaTensorWorldSpace();
 
-	const Vec3& n = contact.normal;
+	const Vec3 n = contact.normal;
 
 	const Vec3 ra = ptOnA - bodyA->GetCenterOfMassWorldSpace();
 	const Vec3 rb = ptOnB - bodyB->GetCenterOfMassWorldSpace();
@@ -53,6 +53,7 @@ void ResolveContact(contact_t& contact)
 	// tangent direction of the velocity with respect to the normal of the collision
 	const Vec3 velTang = vab - velNorm;
 
+	// tangential velocity relative to the other body
 	Vec3 relativeVelTang = velTang;
 	relativeVelTang.Normalize();
 
@@ -60,17 +61,22 @@ void ResolveContact(contact_t& contact)
 	const Vec3 inertiaB = (invWorldInertiaB * rb.Cross(relativeVelTang)).Cross(rb);
 	const float invInertia = (inertiaA + inertiaB).Dot(relativeVelTang);
 
+	// tangential impulse for friction
 	const float reducedMass = 1.0f / (invMassA + invMassB + invInertia);
 	const Vec3 impulseFriction = velTang * reducedMass * friction;
 
+	// apply friction
 	bodyA->ApplyImpulse(ptOnA, impulseFriction * -1.0f);
 	bodyB->ApplyImpulse(ptOnB, impulseFriction * +1.0f);
 
-	// move colliding objects just outside of each other
-	const Vec3 ds = ptOnB - ptOnA;
-	const float tA = invMassA / (invMassA + invMassB);
-	const float tB = invMassB / (invMassA + invMassB);
+	if (contact.timeOfImpact == 0.0f)
+	{
+		// move colliding objects just outside of each other
+		const Vec3 ds = ptOnB - ptOnA;
+		const float tA = invMassA / (invMassA + invMassB);
+		const float tB = invMassB / (invMassA + invMassB);
 
-	bodyA->m_position += ds * tA;
-	bodyB->m_position -= ds * tB;
+		bodyA->m_position += ds * tA;
+		bodyB->m_position -= ds * tB;
+	}
 }

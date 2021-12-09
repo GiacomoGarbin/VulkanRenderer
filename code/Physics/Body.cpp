@@ -121,3 +121,9 @@ Vec3 Body::WorldSpaceToLocalSpace(const Vec3& worldPt) const
 	Vec3 localPt = inverseOrient.RotatePoint(tmp);
 	return localPt;
 }
+
+Vec3 Body::LocalSpaceToWorldSpace(const Vec3& localPt) const
+{
+	Vec3 worldPt = GetCenterOfMassWorldSpace() + m_orientation.RotatePoint(localPt);
+	return worldPt;
+}
