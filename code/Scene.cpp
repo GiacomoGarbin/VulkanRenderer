@@ -53,32 +53,43 @@ void Scene::Initialize()
 {
 	Body body;
 
-	body.m_position = Vec3(-3, 0, +3);
-	body.m_orientation = Quat(0, 0, 0, 1);
-	body.m_linearVelocity = Vec3(1000, 0, 0);
-	body.m_invMass = 1.0f;
-	body.m_elasticity = 0.0f;
-	body.m_friction = 0.5f;
-	body.m_shape = new ShapeSphere(0.5f);
-	m_bodies.push_back(body);
+	for (int x = 0; x < 6; ++x)
+	{
+		for (int y = 0; y < 6; ++y)
+		{
+			float radius = 0.5f;
+			float xx = float(x - 1) * radius * 1.5f;
+			float yy = float(y - 1) * radius * 1.5f;
 
-	body.m_position = Vec3(0, 0, +3);
-	body.m_orientation = Quat(0, 0, 0, 1);
-	body.m_linearVelocity = Vec3(0, 0, 0);
-	body.m_invMass = 0.0f;
-	body.m_elasticity = 0.0f;
-	body.m_friction = 0.5f;
-	body.m_shape = new ShapeSphere(0.5f);
-	m_bodies.push_back(body);
+			body.m_position = Vec3(xx, yy, 10.0f);
+			body.m_orientation = Quat(0, 0, 0, 1);
+			body.m_linearVelocity.Zero();
+			body.m_invMass = 1.0f;
+			body.m_elasticity = 0.5f;
+			body.m_friction = 0.5f;
+			body.m_shape = new ShapeSphere(radius);
+			m_bodies.push_back(body);
+		}
+	}
 
-	body.m_position = Vec3(0, 0, -1000);
-	body.m_orientation = Quat(0, 0, 0, 1);
-	body.m_linearVelocity = Vec3(0, 0, 0);
-	body.m_invMass = 0.0f;
-	body.m_elasticity = 1.0f;
-	body.m_friction = 1.0f;
-	body.m_shape = new ShapeSphere(1000.0f);
-	m_bodies.push_back(body);
+	for (int x = 0; x < 3; ++x)
+	{
+		for (int y = 0; y < 3; ++y)
+		{
+			float radius = 80.0f;
+			float xx = float(x - 1) * radius * 0.25f;
+			float yy = float(y - 1) * radius * 0.25f;
+
+			body.m_position = Vec3(xx, yy, -radius);
+			body.m_orientation = Quat(0, 0, 0, 1);
+			body.m_linearVelocity.Zero();
+			body.m_invMass = 0.0f;
+			body.m_elasticity = 0.99f;
+			body.m_friction = 0.5f;
+			body.m_shape = new ShapeSphere(radius);
+			m_bodies.push_back(body);
+		}
+	}
 }
 
 int CompareContacts(const void* p1, const void* p2)
@@ -106,38 +117,41 @@ Scene::Update
 */
 void Scene::Update(const float dt_sec)
 {
+	// acceleration due to gravity
 	for (int i = 0; i < m_bodies.size(); ++i)
 	{
 		Body* body = &m_bodies[i];
 		float mass = 1.0f / body->m_invMass;
 
-		// acceleration due to gravity
 		Vec3 impulseGravity = Vec3(0, 0, -10) * mass * dt_sec;
 		body->ApplyImpulseLinear(impulseGravity);
 	}
 
+	// broadphase
+	std::vector<collisionPair_t> collisionPairs;
+	BroadPhase(m_bodies.data(), (int)m_bodies.size(), collisionPairs, dt_sec);
+
+	// narrowphase
 	int numContacts = 0;
 	const int maxContacts = m_bodies.size() * m_bodies.size();
 	contact_t* contacts = (contact_t*)alloca(sizeof(contact_t) * maxContacts);
 
-	for (int i = 0; i < m_bodies.size(); ++i)
+	for (int i = 0; i < collisionPairs.size(); ++i)
 	{
-		for (int j = i + 1; j < m_bodies.size(); ++j)
+		const collisionPair_t& pair = collisionPairs[i];
+		Body* bodyA = &m_bodies[pair.a];
+		Body* bodyB = &m_bodies[pair.b];
+
+		if (bodyA->m_invMass == 0.0f && bodyB->m_invMass == 0.0f)
 		{
-			Body* bodyA = &m_bodies[i];
-			Body* bodyB = &m_bodies[j];
+			continue;
+		}
 
-			if (bodyA->m_invMass == 0.0f && bodyB->m_invMass == 0.0f)
-			{
-				continue;
-			}
-
-			contact_t contact;
-			if (Intersect(bodyA, bodyB, dt_sec, contact))
-			{
-				contacts[numContacts] = contact;
-				numContacts++;
-			}
+		contact_t contact;
+		if (Intersect(bodyA, bodyB, dt_sec, contact))
+		{
+			contacts[numContacts] = contact;
+			numContacts++;
 		}
 	}
 
@@ -154,14 +168,14 @@ void Scene::Update(const float dt_sec)
 		contact_t& contact = contacts[i];
 		const float dt = contact.timeOfImpact - accomulatedTime;
 
-		Body* bodyA = contact.bodyA;
-		Body* bodyB = contact.bodyB;
+		//Body* bodyA = contact.bodyA;
+		//Body* bodyB = contact.bodyB;
 
-		// skip infinite mass
-		if (bodyA->m_invMass == 0.0f && bodyB->m_invMass == 0.0f)
-		{
-			continue;
-		}
+		//// skip infinite mass
+		//if (bodyA->m_invMass == 0.0f && bodyB->m_invMass == 0.0f)
+		//{
+		//	continue;
+		//}
 
 		// position update
 		for (int j = 0; j < m_bodies.size(); ++j)
